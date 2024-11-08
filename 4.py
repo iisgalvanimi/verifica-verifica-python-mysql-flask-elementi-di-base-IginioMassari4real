@@ -17,7 +17,7 @@ def connetti_db():
 def get_animali():
     connessione = connetti_db()
     cursore = connessione.cursor(dictionary=True)
-    cursore.execute("SELECT * FROM Mammiferi")
+    cursore.execute("SELECT * FROM mammiferi")
     animali = cursore.fetchall()
     cursore.close()
     connessione.close()
