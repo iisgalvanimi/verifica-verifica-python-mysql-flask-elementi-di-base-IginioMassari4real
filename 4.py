@@ -23,6 +23,37 @@ def get_animali():
     connessione.close()
     return jsonify(animali)
 
+@app.route('/api/animali/filtra/dimensione', methods=['GET'])
+def get_animali_con_dimensione():
+    dimensione_max = request.args.get('dimensione_max')  # Ad esempio, 3 per filtrare gli animali < 3m
+
+    if not dimensione_max:
+        return jsonify({"error": "Parametro 'dimensione_max' mancante"}), 400
+
+    try:
+        dimensione_max = float(dimensione_max)
+
+        connessione = connetti_db()
+        cursore = connessione.cursor(dictionary=True)
+
+        sql = "SELECT * FROM mammiferi WHERE dimensioni < %s"
+        cursore.execute(sql, (dimensione_max,))
+        animali = cursore.fetchall()
+
+        cursore.close()
+        connessione.close()
+
+        if not animali:
+            return jsonify({"message": "Nessun animale trovato con dimensione inferiore a " + str(dimensione_max)}), 404
+
+        return jsonify(animali)
+
+    except ValueError:
+        return jsonify({"error": "'dimensione_max' deve essere un numero valido"}), 400
+
+    except mysql.connector.Error as err:
+        return jsonify({"error": f"Errore del database: {err}"}), 500
+
 @app.route('/api/animali', methods=['POST'])
 def add_animali():
     data = request.get_json()
